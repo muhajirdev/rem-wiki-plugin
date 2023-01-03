@@ -1,4 +1,4 @@
-import { Rem, ReactRNPlugin } from '@remnote/plugin-sdk';
+import { Rem, RNPlugin } from '@remnote/plugin-sdk';
 
 type NodeType = 'node' | 'doc';
 type NodeText =
@@ -34,14 +34,14 @@ type Breadcumb = {
 // TODO:
 // - resolve portal
 
-export const createUtils = (plugin: ReactRNPlugin) => {
+export const createUtils = (plugin: RNPlugin) => {
   return {
     buildDocumentList: buildDocumentList(plugin),
   };
 };
 
 let documentMapping: DocumentMapping = {};
-export const buildDocumentList = (plugin: ReactRNPlugin) => async (rem: Rem) => {
+export const buildDocumentList = (plugin: RNPlugin) => async (rem: Rem) => {
   documentMapping = {}; // reset
 
   await buildJsonTree(plugin)(
@@ -64,7 +64,7 @@ type CallbacksByType = {
 };
 
 const buildText =
-  (plugin: ReactRNPlugin) =>
+  (plugin: RNPlugin) =>
   async (rem: Rem): Promise<NodeText[]> => {
     const nodeTexts: NodeText[] = [];
 
@@ -116,10 +116,10 @@ const buildTitle = (texts: NodeText[]): string => {
  * This function doesn't actually build the nested json tree. It doesn't attach doc inside another doc.
  * But will continue to traverse the node
  *
- * Note: Remember that a doc inside another doc, will be just a node with empty children. Make sure this acknowledged in the front for th epublic page
+ * Note: Remember that a doc inside another doc, will be just a node with empty children. Make sure this acknowledged in the frontend page
  */
 export const buildJsonTree =
-  (plugin: ReactRNPlugin) =>
+  (plugin: RNPlugin) =>
   async (rem: Rem, breadcumbs: Breadcumb[], callbacks?: CallbacksByType, root = false) => {
     const text = await buildText(plugin)(rem);
     const type = (await rem.isDocument()) ? 'doc' : 'node';
@@ -168,10 +168,6 @@ export const buildJsonTree =
       type: type,
       breadcumbs: breadcumbs,
     };
-
-    if (rem._id === 'NZLKRTHKpTZDTWEAM') {
-      console.log({ node });
-    }
 
     if (text.length === 0 && childrenTreeWithoutNull.length === 0) {
       return null;

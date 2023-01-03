@@ -2,8 +2,7 @@ import { declareIndexPlugin, ReactRNPlugin, WidgetLocation } from '@remnote/plug
 import '../style.css';
 import '../App.css';
 import { buildDocumentList, buildJsonTree } from '../utils/build-json-tree';
-
-const BASE_URL = 'https://rem.wiki/api';
+import { publish } from '../utils/publish';
 
 async function onActivate(plugin: ReactRNPlugin) {
   // Register settings
@@ -16,41 +15,7 @@ async function onActivate(plugin: ReactRNPlugin) {
   await plugin.app.registerCommand({
     id: 'publish-digital-garden',
     name: 'Publish Digital Garden',
-    action: async () => {
-      await plugin.app.toast('Publishing Digital Garden');
-      const powerup = await plugin.powerup.getPowerupByCode('public-digital-garden');
-      const rems = await powerup?.taggedRem();
-      const rootRem = rems?.[0];
-      console.log(rootRem?._id);
-      if (rootRem) {
-        const documentList = await buildDocumentList(plugin)(rootRem);
-        console.log(documentList);
-        const jsonTree = await buildJsonTree(plugin)(rootRem, [], undefined, true);
-        console.log({ jsonTree });
-
-        let username = await plugin.settings.getSetting<string>('username');
-
-        await fetch(`${BASE_URL}/publish`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username,
-            rootId: rootRem?._id,
-            documentMappings: documentList,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            plugin.app.toast('Published');
-            console.log('Success:', data);
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-    },
+    action: () => publish(plugin),
   });
 
   await plugin.app.registerPowerup(
