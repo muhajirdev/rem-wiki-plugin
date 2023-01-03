@@ -1,17 +1,16 @@
 {
+  "author": "muhajirdev",
+  "name": "rem-wiki",
+  "description": "Publish your remnote as Digital Garden",
+  "enableOnMobile": false,
+  "id": "muhajirdev-k3sv4kz",
   "manifestVersion": 1,
-  "id": "plugin_template",
-  "name": "Plugin Template",
-  "author": "remnote",
-  "repoUrl": "",
+  "repoUrl": "https://github.com./muhajirdev/rem-wiki-plugin",
   "version": {
     "major": 0,
     "minor": 0,
-    "patch": 1
+    "patch": 2
   },
-  "theme": [],
-  "enableOnMobile": false,
-  "description": "",
   "requestNative": false,
   "requiredScopes": [
     {

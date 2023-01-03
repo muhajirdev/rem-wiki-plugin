@@ -9,11 +9,9 @@ export const SampleWidget = () => {
 
   return (
     <div className="p-2 m-2 rounded-lg rn-clr-background-light-positive rn-clr-content-positive">
-      <h1 className="text-xl">Sample Plugin</h1>
-      <div>
-        Hi {name}, you {!!likesPizza ? 'do' : "don't"} like pizza and your favorite number is{' '}
-        {favoriteNumber}!
-      </div>
+      <button className="px-4 py-2 bg-black rounded-lg text-white">
+        Publish your Digital Garden
+      </button>
     </div>
   );
 };
