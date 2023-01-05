@@ -68,21 +68,14 @@ const buildText =
   async (rem: Rem): Promise<NodeText[]> => {
     const nodeTexts: NodeText[] = [];
 
-    if (await rem.isPowerupSlot()) return [];
+    if (await rem.isPowerupSlot?.()) return [];
 
     for (const element of rem.text) {
       if (typeof element === 'string') {
-        if (element === 'Status') {
-          console.log('status', {
-            rem,
-            element,
-            isPowerupSlot: await rem.isPowerupSlot(),
-            isSlot: await rem.isSlot(),
-          });
-        }
         nodeTexts.push({ type: 'text', content: element });
       }
       if (element?.i === 'q') {
+        // 'q' meaning a rem reference https://plugins.remnote.com/api/modules#richtextelementreminterface
         const refRem = await plugin.rem.findOne(element._id);
         if (refRem) {
           const text = await buildText(plugin)(refRem);
@@ -135,10 +128,40 @@ export const buildJsonTree =
       },
     ];
 
+    // when the rem is a portal, treat is a doc so that in rem-wiki. It will just be treated as a link
+    // when user click it, he will be navigated to the rem page
+
+    // here, because a portal can contains more than one node, we return array of node (see `portalChildren.map`)
+    // so we need to flatten this part in the parent section. see the `flat` near buildJsonTree below
+    const isPortal = rem.type === 6; // https://plugins.remnote.com/api/enums/REM_TYPE#portal
+    if (isPortal) {
+      const portalChildren = await rem.getPortalDirectlyIncludedRem();
+      if (portalChildren.length === 0) {
+        return null;
+      }
+      const firstNodeOfPortal = portalChildren[0];
+      const portalText = await buildText(plugin)(firstNodeOfPortal);
+      return portalChildren
+        .map((portalNode) => {
+          return {
+            id: portalNode._id,
+            fontSize: undefined,
+            type: 'doc',
+            title: buildTitle(portalText),
+            children: [],
+            text: portalText,
+            breadcumbs: breadcumbs,
+          };
+        })
+        .filter((node) => !!node.title); // filter out empty title
+    }
+
     const children = await rem.getChildrenRem();
-    const childrenTree = await Promise.all(
-      children.map((child) => buildJsonTree(plugin)(child, _breadcumbs, callbacks))
-    );
+    const childrenTree = (
+      await Promise.all(
+        children.map((child) => buildJsonTree(plugin)(child, _breadcumbs, callbacks))
+      )
+    ).flat();
 
     const childrenTreeWithoutNull: Node[] = childrenTree.filter((val) => !!val) as Node[];
 
@@ -147,7 +170,7 @@ export const buildJsonTree =
       if (child.type === 'doc') {
         const node = {
           id: child.id,
-          title,
+          title: child.title,
           text: child.text,
           fontSize,
           children: [],

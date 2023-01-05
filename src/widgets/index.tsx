@@ -28,7 +28,8 @@ async function onActivate(plugin: ReactRNPlugin) {
   );
 
   // Register a sidebar widget.
-  await plugin.app.registerWidget('sample_widget', WidgetLocation.RightSidebar, {
+  await plugin.app.registerWidget('publication_sidebar', WidgetLocation.RightSidebar, {
+    widgetTabTitle: 'Rem Wiki',
     dimensions: { height: 'auto', width: '100%' },
   });
 }

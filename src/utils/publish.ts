@@ -1,7 +1,6 @@
 import { RNPlugin } from '@remnote/plugin-sdk';
+import { BASE_API_URL } from '../constants';
 import { buildDocumentList, buildJsonTree } from './build-json-tree';
-
-const BASE_URL = 'https://rem.wiki/api';
 
 /**
  * TODO: for optimization, fetch list of all published Ids from backend, and compare the the `updatedAt` value
@@ -9,12 +8,18 @@ const BASE_URL = 'https://rem.wiki/api';
  */
 
 export const publish = async (plugin: RNPlugin) => {
-  await plugin.app.toast('Publishing Digital Garden');
   const powerup = await plugin.powerup.getPowerupByCode('public-digital-garden');
   const rems = await powerup?.taggedRem();
   const rootRem = rems?.[0];
-  console.log(rootRem?._id);
+
+  if (!rootRem) {
+    return plugin.app.toast(
+      `No Rem is tagged with powerup 'Public Digital Garden. Please tag one your rem with it first`
+    );
+  }
+
   if (rootRem) {
+    await plugin.app.toast('Publishing Digital Garden');
     const documentList = await buildDocumentList(plugin)(rootRem);
     console.log(documentList);
     const jsonTree = await buildJsonTree(plugin)(rootRem, [], undefined, true);
@@ -22,7 +27,11 @@ export const publish = async (plugin: RNPlugin) => {
 
     let username = await plugin.settings.getSetting<string>('username');
 
-    await fetch(`${BASE_URL}/publish`, {
+    if (!username) {
+      return plugin.app.toast('Please set your username before publishing your digital garden');
+    }
+
+    await fetch(`${BASE_API_URL}/publish`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
