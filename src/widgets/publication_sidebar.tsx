@@ -28,7 +28,9 @@ const UpdateYourUsername = () => {
 export const PublicationSidebar = () => {
   const plugin = usePlugin();
 
-  let username = useTracker(() => plugin.settings.getSetting<string>('username'));
+  let username = useTracker((reactivePlugin) =>
+    reactivePlugin.settings.getSetting<string>('username')
+  );
 
   const onClick = () => {
     publish(plugin);
