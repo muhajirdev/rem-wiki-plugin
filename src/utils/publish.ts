@@ -43,7 +43,12 @@ export const publish = async (plugin: RNPlugin) => {
           documentMappings: documentList,
         }),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json();
+          }
+          throw new Error('something went wrong');
+        })
         .then((data) => {
           plugin.app.toast('Published');
           console.log('Success:', data);

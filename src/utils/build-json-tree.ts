@@ -9,6 +9,7 @@ type NodeText =
   | {
       type: 'link';
       content: NodeText[];
+      id: string;
     };
 
 type Node = {
@@ -30,9 +31,6 @@ type Breadcumb = {
   id: string;
   type: NodeType;
 };
-
-// TODO:
-// - resolve portal
 
 export const createUtils = (plugin: RNPlugin) => {
   return {
@@ -80,7 +78,7 @@ const buildText =
         if (refRem) {
           const text = await buildText(plugin)(refRem);
           if (text.length > 0) {
-            nodeTexts.push({ type: 'link', content: text });
+            nodeTexts.push({ type: 'link', content: text, id: refRem._id });
           }
         }
       }
