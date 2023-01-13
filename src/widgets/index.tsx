@@ -7,8 +7,8 @@ import { publish } from '../utils/publish';
 async function onActivate(plugin: ReactRNPlugin) {
   // Register settings
   await plugin.settings.registerStringSetting({
-    id: 'username',
-    title: 'Your username',
+    id: 'apiKey',
+    title: 'Your API Key',
   });
 
   // A command that inserts text into the editor if focused.

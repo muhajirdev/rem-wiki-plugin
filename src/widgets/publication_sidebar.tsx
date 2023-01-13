@@ -4,23 +4,14 @@ import { getPublicSiteByUsername } from '../utils/urls';
 
 const WelcomeText = () => <h1 className="text-xl">Welcome to Rem Wiki</h1>;
 
-const PublicSiteInformation = ({ username }: { username: string }) => (
-  <div className="border-gray-400">
-    <p>
-      Your username is <span>{username}</span>
-    </p>
-    <p>Your digital garden will be published to {getPublicSiteByUsername(username)}</p>
-  </div>
-);
-
 const UpdateYourUsername = () => {
   return (
     <div>
       <p>
-        Please set your username in <br />
-        <code>{'Settings -> Plugin Settings -> rem-wiki -> Your username'}</code>
+        Please set API key in <br />
+        <code>{'Settings -> Plugin Settings -> rem-wiki -> Your API key'}</code>
       </p>
-      <p>After you put your username, close this plugin tab, and re open it</p>
+      <p>To create your API Key go to https://rem.wiki and sign up</p>
     </div>
   );
 };
@@ -28,9 +19,7 @@ const UpdateYourUsername = () => {
 export const PublicationSidebar = () => {
   const plugin = usePlugin();
 
-  let username = useTracker((reactivePlugin) =>
-    reactivePlugin.settings.getSetting<string>('username')
-  );
+  let apiKey = useTracker((reactivePlugin) => reactivePlugin.settings.getSetting<string>('apiKey'));
 
   const onClick = () => {
     publish(plugin);
@@ -39,11 +28,10 @@ export const PublicationSidebar = () => {
   return (
     <div className="p-4">
       <WelcomeText />
-      {!username && <UpdateYourUsername />}
+      {!apiKey && <UpdateYourUsername />}
 
-      {username && (
+      {apiKey && (
         <div>
-          <PublicSiteInformation username={username} />
           <button onClick={onClick} className="px-4 py-2 bg-black rounded-lg text-white">
             Publish your Digital Garden
           </button>
