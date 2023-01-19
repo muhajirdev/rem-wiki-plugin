@@ -1,10 +1,32 @@
-import { BuiltInPowerupCodes, Rem, RICH_TEXT_ELEMENT_TYPE, RNPlugin } from '@remnote/plugin-sdk';
+import {
+  BuiltInPowerupCodes,
+  Rem,
+  RichTextElementTextInterface,
+  RICH_TEXT_ELEMENT_TYPE,
+  RICH_TEXT_FORMATTING,
+  RNPlugin,
+} from '@remnote/plugin-sdk';
+
+type Formatting = 'bold' | 'italic' | 'quote' | 'underline' | 'code' | 'highlight' | 'inline-code';
+
+const getFormattings = (element: RichTextElementTextInterface): Formatting[] => {
+  const formattings: Formatting[] = [];
+
+  if (element[RICH_TEXT_FORMATTING.BOLD]) formattings.push('bold');
+  if (element[RICH_TEXT_FORMATTING.ITALIC]) formattings.push('italic');
+  if (element[RICH_TEXT_FORMATTING.CODE]) formattings.push('code');
+  if (element[RICH_TEXT_FORMATTING.HIGHLIGHT]) formattings.push('highlight');
+  if (element[RICH_TEXT_FORMATTING.QUOTE]) formattings.push('quote');
+
+  return formattings;
+};
 
 type NodeType = 'node' | 'doc';
 type NodeText =
   | {
       type: 'text';
       content: string;
+      formattings?: Formatting[];
     }
   | {
       type: 'link';
@@ -72,6 +94,24 @@ const buildText =
     for (const element of rem.text) {
       if (typeof element === 'string') {
         nodeTexts.push({ type: 'text', content: element });
+      }
+      if (element?.i === RICH_TEXT_ELEMENT_TYPE.TEXT) {
+        if (element.qId) {
+          const remRef = await plugin.rem.findOne(element.qId);
+          const url = await remRef?.getPowerupProperty?.(BuiltInPowerupCodes.Link, 'URL');
+          nodeTexts.push({
+            id: element.qId,
+            type: 'link',
+            url,
+            content: [{ type: 'text', content: element.text }],
+          });
+        } else {
+          nodeTexts.push({
+            type: 'text',
+            content: element.text,
+            formattings: getFormattings(element),
+          });
+        }
       }
       if (element?.i === RICH_TEXT_ELEMENT_TYPE.REM) {
         // https://plugins.remnote.com/api/modules#richtextelementreminterface
