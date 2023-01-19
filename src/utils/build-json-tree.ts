@@ -1,4 +1,4 @@
-import { Rem, RNPlugin } from '@remnote/plugin-sdk';
+import { BuiltInPowerupCodes, Rem, RICH_TEXT_ELEMENT_TYPE, RNPlugin } from '@remnote/plugin-sdk';
 
 type NodeType = 'node' | 'doc';
 type NodeText =
@@ -10,6 +10,7 @@ type NodeText =
       type: 'link';
       content: NodeText[];
       id: string;
+      url?: string;
     };
 
 type Node = {
@@ -72,13 +73,14 @@ const buildText =
       if (typeof element === 'string') {
         nodeTexts.push({ type: 'text', content: element });
       }
-      if (element?.i === 'q') {
-        // 'q' meaning a rem reference https://plugins.remnote.com/api/modules#richtextelementreminterface
+      if (element?.i === RICH_TEXT_ELEMENT_TYPE.REM) {
+        // https://plugins.remnote.com/api/modules#richtextelementreminterface
         const refRem = await plugin.rem.findOne(element._id);
         if (refRem) {
           const text = await buildText(plugin)(refRem);
           if (text.length > 0) {
-            nodeTexts.push({ type: 'link', content: text, id: refRem._id });
+            const url = await refRem?.getPowerupProperty?.(BuiltInPowerupCodes.Link, 'URL');
+            nodeTexts.push({ type: 'link', content: text, id: refRem._id, url });
           }
         }
       }
